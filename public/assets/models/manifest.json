@@ -1,0 +1,17 @@
+{
+  "openai": "/assets/models/openai.svg",
+  "gpt": "/assets/models/openai.svg",
+  "claude": "/assets/models/claude.png",
+  "anthropic": "/assets/models/anthropic.png",
+  "gemini": "/assets/models/gemini.png",
+  "google": "/assets/models/gemini.png",
+  "qwen": "/assets/models/qwen.png",
+  "kimi": "/assets/models/kimi.png",
+  "moonshot": "/assets/models/kimi.png",
+  "deepseek": "/assets/models/deepseek.png",
+  "grok": "/assets/models/grok.png",
+  "xai": "/assets/models/grok.png",
+  "mistral": "/assets/models/mistral.png",
+  "zai": "/assets/models/zai.png",
+  "z.ai": "/assets/models/zai.png"
+}

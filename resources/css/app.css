@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App-wide scrollbar polish: Chromium/Edge/Safari + Firefox */
+:root {
+    scrollbar-color: rgba(34, 211, 238, 0.35) rgba(255, 255, 255, 0.035);
+    scrollbar-width: thin;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(34, 211, 238, 0.32) rgba(255, 255, 255, 0.035);
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.025);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(34, 211, 238, 0.45), rgba(168, 85, 247, 0.35));
+    border: 3px solid rgba(7, 8, 13, 0.95);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(103, 232, 249, 0.72), rgba(216, 180, 254, 0.55));
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Utility: hide scrollbar while keeping scroll behavior */
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
+/* Code blocks: slimmer horizontal scrollbar */
+pre,
+code,
+.prose pre {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(34, 211, 238, 0.38) transparent;
+}
+
+pre::-webkit-scrollbar,
+code::-webkit-scrollbar,
+.prose pre::-webkit-scrollbar {
+    height: 8px;
+    width: 6px;
+}
+
+pre::-webkit-scrollbar-track,
+code::-webkit-scrollbar-track,
+.prose pre::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+pre::-webkit-scrollbar-thumb,
+code::-webkit-scrollbar-thumb,
+.prose pre::-webkit-scrollbar-thumb {
+    background: rgba(34, 211, 238, 0.35);
+    border: 2px solid rgba(5, 6, 10, 1);
+    border-radius: 999px;
+}
+
+/* Model picker dropdown: neutral in-panel scrollbar */
+.model-dropdown-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.28) rgba(255, 255, 255, 0.025);
+    scrollbar-gutter: stable;
+}
+
+.model-dropdown-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.model-dropdown-scroll::-webkit-scrollbar-track {
+    margin: 12px 0;
+    background: rgba(255, 255, 255, 0.025);
+    border-radius: 999px;
+}
+
+.model-dropdown-scroll::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.26);
+    border: 1px solid rgba(2, 6, 23, 0.96);
+    border-radius: 999px;
+}
+
+.model-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(203, 213, 225, 0.38);
+}
