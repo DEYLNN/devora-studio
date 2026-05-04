@@ -92,3 +92,19 @@ storage/logs
 storage/framework/cache
 storage/framework/views
 ```
+
+## Version Control Rule
+
+Devora Studio uses `package.json` as the app version source. Current baseline starts at `0.1.0`.
+
+Every meaningful project update must include:
+
+1. Bump `package.json` `version` using semantic versioning.
+   - Patch: bugfix, UI polish, small copy/config update. Example: `0.1.0` → `0.1.1`.
+   - Minor: new user-visible feature or admin capability. Example: `0.1.0` → `0.2.0`.
+   - Major: breaking architecture/API/data change. Example: `0.x.x` → `1.0.0` when production-ready.
+2. Update `CHANGELOG.md` with the new version, date, and concise bullets.
+3. Update the in-app `APP_VERSION` and `CHANGELOG` block in `resources/js/Pages/PublicChat.jsx` when the change should be visible in the public chat sidebar.
+4. Run `npm run build` after UI/version changes.
+
+Rule of thumb: kalau ada update yang layak diceritain ke user, versi harus ikut naik.

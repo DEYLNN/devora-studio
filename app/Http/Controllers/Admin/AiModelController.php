@@ -30,19 +30,11 @@ class AiModelController extends Controller
 
         $models = $models
             ->sortBy(function (AiModel $model) {
-                if ($model->is_default) {
-                    return '0-000000-'.$model->display_name;
-                }
+                $activeRank = $model->is_active ? 0 : 1;
+                $launchRank = $model->launched_at ? 9999999999 - $model->launched_at->timestamp : 9999999999;
+                $defaultRank = $model->is_default ? 0 : 1;
 
-                if ($model->is_active && $model->is_latest) {
-                    return sprintf('1-%08.2f-%s', 99999 - (float) $model->version_rank, $model->display_name);
-                }
-
-                if ($model->is_active) {
-                    return sprintf('2-%08.2f-%s', 99999 - (float) $model->version_rank, $model->display_name);
-                }
-
-                return sprintf('3-%s', $model->display_name);
+                return sprintf('%d-%010d-%d-%s', $activeRank, $launchRank, $defaultRank, $model->display_name);
             })
             ->values();
 
@@ -59,7 +51,8 @@ class AiModelController extends Controller
             'model_id' => ['required','string','max:160'],
             'display_name' => ['required','string','max:160'],
             'context_window' => ['nullable','integer','min:1'],
-            'category' => ['nullable','in:openai,claude,gemini,qwen,kimi,deepseek,grok,llama,mistral,zai,generic'],
+            'category' => ['nullable','in:openai,claude,gemini,qwen,kimi,deepseek,grok,llama,mistral,zai,xiaomi,minimax,generic'],
+            'launched_at' => ['nullable','date'],
             'supports_vision' => ['nullable','boolean'],
             'supports_files' => ['nullable','boolean'],
             'supports_streaming' => ['nullable','boolean'],
@@ -91,7 +84,8 @@ class AiModelController extends Controller
             'model_id' => ['required','string','max:160'],
             'display_name' => ['required','string','max:160'],
             'context_window' => ['nullable','integer','min:1'],
-            'category' => ['required','in:openai,claude,gemini,qwen,kimi,deepseek,grok,llama,mistral,zai,generic'],
+            'category' => ['required','in:openai,claude,gemini,qwen,kimi,deepseek,grok,llama,mistral,zai,xiaomi,minimax,generic'],
+            'launched_at' => ['nullable','date'],
             'supports_vision' => ['boolean'],
             'supports_files' => ['boolean'],
             'supports_streaming' => ['boolean'],

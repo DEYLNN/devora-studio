@@ -63,8 +63,8 @@ export default function Index({ providers = [] }) {
     return (
         <AuthenticatedLayout header={<div><p className="text-xs font-bold uppercase tracking-[.35em] text-cyan-200/70">Admin</p><h2 className="mt-2 text-2xl font-black tracking-[-.04em] text-white">Providers</h2></div>}>
             <Head title="Providers" />
-            <div className="mx-auto grid max-w-7xl gap-4 p-4 lg:grid-cols-[420px_1fr]">
-                <form onSubmit={submit} className="rounded-[1.75rem] border border-white/10 bg-slate-950/70 p-5 shadow-2xl backdrop-blur-xl">
+            <div className="mx-auto grid max-w-7xl gap-4 p-3 sm:p-4 lg:grid-cols-[420px_1fr]">
+                <form onSubmit={submit} className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:rounded-[1.75rem] sm:p-5 shadow-2xl backdrop-blur-xl">
                     <div className="mb-6">
                         <div className="inline-flex rounded-full border border-cyan-200/15 bg-cyan-200/10 px-3 py-1 text-[11px] font-black uppercase tracking-[.2em] text-cyan-100">Encrypted config</div>
                         <h3 className="mt-4 text-xl font-black tracking-[-.04em] text-white">Add provider</h3>
@@ -91,13 +91,13 @@ export default function Index({ providers = [] }) {
                     </button>
                 </form>
 
-                <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/70 p-5 shadow-2xl backdrop-blur-xl">
-                    <div className="mb-5 flex items-start justify-between gap-4">
+                <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:rounded-[1.75rem] sm:p-5 shadow-2xl backdrop-blur-xl">
+                    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <h3 className="font-black text-white">Configured providers</h3>
                             <p className="mt-1 text-sm text-slate-500">Keys are masked. Edit form never shows the old key; fill API key only to replace it.</p>
                         </div>
-                        <Link href={route('admin.models.index')} className="rounded-xl border border-white/10 px-3 py-2 text-sm font-bold text-cyan-100 transition hover:bg-cyan-200/10">Models →</Link>
+                        <Link href={route('admin.models.index')} className="rounded-xl border border-white/10 px-3 py-2 text-center text-sm font-bold text-cyan-100 transition hover:bg-cyan-200/10">Models →</Link>
                     </div>
 
                     <div className="space-y-3">
@@ -107,7 +107,7 @@ export default function Index({ providers = [] }) {
                                 <div key={provider.id} className="rounded-2xl border border-white/10 bg-white/[.035] p-4 transition hover:border-cyan-200/20 hover:bg-white/[.055]">
                                     {!editing ? (
                                         <>
-                                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                                 <div className="min-w-0">
                                                     <div className="flex flex-wrap items-center gap-2">
                                                         <div className="font-black text-white">{provider.name}</div>
@@ -117,7 +117,7 @@ export default function Index({ providers = [] }) {
                                                 </div>
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <div className={`rounded-full border px-3 py-1 text-xs font-bold ${provider.has_api_key ? 'border-emerald-300/20 bg-emerald-300/10 text-emerald-100' : 'border-amber-300/20 bg-amber-300/10 text-amber-100'}`}>{maskKey(provider.has_api_key)}</div>
-                                                    <button type="button" onClick={() => startEdit(provider)} className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-black text-slate-300 transition hover:border-cyan-200/30 hover:bg-cyan-200/10 hover:text-cyan-100">Edit</button>
+                                                    <button type="button" onClick={() => startEdit(provider)} className="rounded-xl border border-white/10 px-3 py-2 text-xs font-black text-slate-300 transition hover:border-cyan-200/30 hover:bg-cyan-200/10 hover:text-cyan-100 sm:py-1.5">Edit</button>
                                                 </div>
                                             </div>
 
@@ -126,11 +126,11 @@ export default function Index({ providers = [] }) {
                                                 <code className="break-all text-xs text-slate-300">{provider.base_url}</code>
                                             </div>
 
-                                            <div className="mt-3 text-right text-[11px] text-slate-600">Created {shortDate(provider.created_at)}</div>
+                                            <div className="mt-3 text-left text-[11px] text-slate-600 sm:text-right">Created {shortDate(provider.created_at)}</div>
                                         </>
                                     ) : (
                                         <form onSubmit={(e) => submitEdit(e, provider)} className="space-y-4">
-                                            <div className="flex items-center justify-between gap-3">
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                                 <div>
                                                     <div className="text-sm font-black text-white">Edit provider</div>
                                                     <div className="mt-1 text-xs text-slate-500">API key lama tidak ditampilkan. Isi API key hanya kalau mau replace.</div>

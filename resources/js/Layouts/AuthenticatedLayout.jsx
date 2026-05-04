@@ -9,15 +9,15 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div className="min-h-screen bg-[#07080d] text-slate-100">
+        <div className="min-h-screen overflow-x-hidden bg-[#07080d] text-slate-100">
             <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(34,211,238,.16),transparent_28%),radial-gradient(circle_at_88%_12%,rgba(168,85,247,.16),transparent_30%)]" />
-            <nav className="relative z-10 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
+            <nav className="relative z-10 overflow-x-hidden border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex items-center gap-8">
+                    <div className="flex min-h-16 items-center justify-between gap-3 py-3">
+                        <div className="flex min-w-0 items-center gap-4 lg:gap-8">
                             <Link href="/" className="flex items-center gap-3">
-                                <div className="grid size-9 place-items-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-sm font-black text-cyan-200">A</div>
-                                <span className="hidden text-sm font-bold tracking-[.22em] text-white/80 sm:block">AI STUDIO</span>
+                                <div className="grid size-9 shrink-0 place-items-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-sm font-black text-cyan-200">D</div>
+                                <span className="hidden text-sm font-bold tracking-[.22em] text-white/80 sm:block">DEVORA</span>
                             </Link>
                             <div className="hidden space-x-6 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>Dashboard</NavLink>
@@ -38,14 +38,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Dropdown.Content>
                             </Dropdown>
                         </div>
-                        <div className="flex items-center sm:hidden">
+                        <div className="flex shrink-0 items-center sm:hidden">
                             <button onClick={() => setShowingNavigationDropdown((v) => !v)} className="rounded-xl border border-white/10 p-2 text-slate-300">
                                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={showingNavigationDropdown ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} /></svg>
                             </button>
                         </div>
                     </div>
                 </div>
-                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' border-t border-white/10 sm:hidden'}>
+                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' border-t border-white/10 bg-slate-950/95 shadow-2xl sm:hidden'}>
                     <div className="space-y-1 p-3">
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>Dashboard</ResponsiveNavLink>
                         <ResponsiveNavLink href={route('chat.index')} active={route().current('chat.*')}>Chat</ResponsiveNavLink>
@@ -54,8 +54,8 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </div>
             </nav>
-            {header && <header className="relative z-10 border-b border-white/10 bg-white/[.02]"><div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{header}</div></header>}
-            <main className="relative z-10">{children}</main>
+            {header && <header className="relative z-10 border-b border-white/10 bg-white/[.02]"><div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">{header}</div></header>}
+            <main className="relative z-10 min-w-0 overflow-x-hidden">{children}</main>
         </div>
     );
 }

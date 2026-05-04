@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\PublicChatController;
 use App\Http\Controllers\PublicChatImageController;
+use App\Http\Controllers\PublicChatFileController;
 use App\Http\Controllers\Admin\ProviderController;
 use App\Http\Controllers\Admin\AiModelController;
 use Illuminate\Foundation\Application;
@@ -24,6 +25,7 @@ Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verif
 Route::get('/chat', [PublicChatController::class, 'index'])->name('public.chat');
 Route::post('/chat/message', [PublicChatController::class, 'message'])->middleware('throttle:public-chat-message')->name('public.chat.message');
 Route::post('/chat/images', [PublicChatImageController::class, 'store'])->middleware('throttle:public-chat-upload')->name('public.chat.images');
+Route::post('/chat/files', [PublicChatFileController::class, 'store'])->middleware('throttle:public-chat-upload')->name('public.chat.files');
 Route::post('/chat/summarize', [PublicChatController::class, 'summarize'])->middleware('throttle:public-chat-summarize')->name('public.chat.summarize');
 
 Route::middleware(['auth', 'verified'])->group(function () {

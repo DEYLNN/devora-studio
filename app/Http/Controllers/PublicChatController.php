@@ -25,7 +25,7 @@ class PublicChatController extends Controller
 
         $models = AiModel::query()
             ->with('provider:id,name')
-            ->get(['id','provider_id','display_name','model_id','category','supports_vision','supports_files','is_default','is_latest','is_active'])
+            ->get(['id','provider_id','display_name','model_id','category','supports_vision','supports_files','is_default','is_latest','launched_at','is_active'])
             ->map(function (AiModel $model) use ($versionOf) {
                 $model->version_rank = $versionOf($model);
                 return $model;
@@ -33,19 +33,11 @@ class PublicChatController extends Controller
 
         $models = $models
             ->sortBy(function (AiModel $model) {
-                if ($model->is_default) {
-                    return '0-000000-'.$model->display_name;
-                }
+                $activeRank = $model->is_active ? 0 : 1;
+                $launchRank = $model->launched_at ? 9999999999 - $model->launched_at->timestamp : 9999999999;
+                $defaultRank = $model->is_default ? 0 : 1;
 
-                if ($model->is_active && $model->is_latest) {
-                    return sprintf('1-%08.2f-%s', 99999 - (float) $model->version_rank, $model->display_name);
-                }
-
-                if ($model->is_active) {
-                    return sprintf('2-%08.2f-%s', 99999 - (float) $model->version_rank, $model->display_name);
-                }
-
-                return sprintf('3-%s', $model->display_name);
+                return sprintf('%d-%010d-%d-%s', $activeRank, $launchRank, $defaultRank, $model->display_name);
             })
             ->values();
 
@@ -107,9 +99,14 @@ class PublicChatController extends Controller
             'messages' => ['required','array','max:24'],
             'messages.*.role' => ['required','in:user,assistant'],
             'messages.*.content' => ['required','string','max:8000'],
-            'messages.*.images' => ['nullable','array','max:4'],
+            'messages.*.images' => ['nullable','array','max:2'],
             'messages.*.images.*.path' => ['required_with:messages.*.images','string'],
             'messages.*.images.*.mime' => ['nullable','string'],
+            'messages.*.files' => ['nullable','array','max:2'],
+            'messages.*.files.*.name' => ['required_with:messages.*.files','string','max:180'],
+            'messages.*.files.*.mime' => ['nullable','string','max:120'],
+            'messages.*.files.*.size' => ['nullable','integer','max:1048576'],
+            'messages.*.files.*.content' => ['nullable','string','max:24000'],
         ]);
 
         $model = AiModel::query()
@@ -126,11 +123,26 @@ class PublicChatController extends Controller
         $messages = collect($data['messages'])
             ->take(-20)
             ->map(function ($message) {
-                $images = collect($message['images'] ?? [])->take(4)->map(function ($image) {
+                $files = collect($message['files'] ?? [])->take(2)->map(function ($file, $index) {
+                    $name = str($file['name'] ?? 'attachment.txt')->limit(180, '')->toString();
+                    $content = str($file['content'] ?? '')->limit(24000, "
+...[truncated]")->toString();
+                    if (trim($content) === '') {
+                        $content = "[No extractable text was found for {$name}. The file uploaded successfully, but the parser returned empty content. Ask the user to convert it to CSV/text or install the full parser/OCR runtime if detailed analysis is required.]";
+                    }
+                    $fileNumber = $index + 1;
+
+                    return "File {$fileNumber}: {$name}
+```text
+{$content}
+```";
+                })->filter()->values()->all();
+
+                $images = collect($message['images'] ?? [])->take(2)->map(function ($image) {
                     $path = $image['path'] ?? '';
                     abort_unless(str_starts_with($path, 'public-chat-images/'), 422, 'Invalid image path.');
                     abort_if(str_contains($path, '..') || str_contains($path, '\\'), 422, 'Invalid image path.');
-                    abort_unless(preg_match('/^public-chat-images\/\d{4}-\d{2}-\d{2}\/[a-f0-9-]+\.(jpg|jpeg|png|webp|gif)$/i', $path), 422, 'Invalid image path.');
+                    abort_unless(preg_match('/^public-chat-images\/\d{4}-\d{2}-\d{2}\/[a-f0-9-]+\.(jpg|jpeg|png|webp)$/i', $path), 422, 'Invalid image path.');
                     abort_unless(Storage::disk('public')->exists($path), 422, 'Image not found.');
                     $mime = $image['mime'] ?? Storage::disk('public')->mimeType($path) ?? 'image/jpeg';
                     $base64 = base64_encode(Storage::disk('public')->get($path));
@@ -141,11 +153,42 @@ class PublicChatController extends Controller
                 })->all();
 
                 if ($message['role'] === 'user' && count($images) > 0) {
+                    $imageParts = [];
+                    foreach ($images as $index => $image) {
+                        $imageNumber = $index + 1;
+                        $imageParts[] = ['type' => 'text', 'text' => "Image {$imageNumber}:"];
+                        $imageParts[] = $image;
+                    }
+
+                    $prompt = trim($message['content']);
+                    $imageCount = count($images);
+                    $intro = "The user attached {$imageCount} image".($imageCount > 1 ? 's' : '').". Consider every attached image. If comparing them, refer to them as Image 1, Image 2, etc.";
+
                     return [
                         'role' => 'user',
                         'content' => array_merge([
-                            ['type' => 'text', 'text' => $message['content']],
-                        ], $images),
+                            ['type' => 'text', 'text' => $intro."
+
+".($prompt !== '' ? $prompt : 'Please analyze the attached image(s).')],
+                        ], $imageParts),
+                    ];
+                }
+
+                if ($message['role'] === 'user' && count($files) > 0) {
+                    $fileCount = count($files);
+                    $prompt = trim($message['content']);
+                    $intro = "The user attached {$fileCount} file".($fileCount > 1 ? 's' : '').". Use the attached file content as context. If comparing them, refer to them as File 1, File 2, etc.";
+
+                    return [
+                        'role' => 'user',
+                        'content' => $intro."
+
+".implode("
+
+", $files)."
+
+User request:
+".($prompt !== '' ? $prompt : 'Please analyze the attached file(s).'),
                     ];
                 }
 
@@ -173,7 +216,7 @@ class PublicChatController extends Controller
             $response = $client->chat($model->load('provider'), $messages);
             $content = trim($client->extractContent($response));
             if ($content === '') {
-                $content = 'The provider returned an empty response.';
+                $content = 'The selected AI model returned an empty response. Please try again, or switch to another model if this keeps happening.';
             }
 
             UsageLog::create(array_merge([
@@ -206,7 +249,31 @@ class PublicChatController extends Controller
                 'metadata' => ['surface' => 'public-localstorage-chat'],
             ]);
 
-            return response()->json(['message' => 'Maaf, AI sedang gagal merespons. Coba lagi sebentar atau ganti model.'], 502);
+            return response()->json(['message' => $this->publicErrorMessage($e)], 502);
         }
     }
+    private function publicErrorMessage(Throwable $e): string
+    {
+        $message = strtolower($e->getMessage());
+        $status = method_exists($e, 'response') && $e->response() ? $e->response()->status() : null;
+
+        if (str_contains($message, 'curl error 28') || str_contains($message, 'timed out') || str_contains($message, 'timeout')) {
+            return 'The selected AI model took too long to respond. Please try again, or switch to another model if this keeps happening.';
+        }
+
+        if ($status === 429 || str_contains($message, 'too many requests') || str_contains($message, 'rate limit')) {
+            return 'Too many requests. Please wait a moment before sending another message.';
+        }
+
+        if (in_array($status, [401, 403], true)) {
+            return 'The selected AI model is temporarily unavailable. Please choose another model or try again later.';
+        }
+
+        if ($status && $status >= 500) {
+            return 'The AI provider is temporarily unavailable. Please try again in a moment or switch to another model.';
+        }
+
+        return 'The selected AI model could not respond right now. Please try again or switch to another model.';
+    }
+
 }
